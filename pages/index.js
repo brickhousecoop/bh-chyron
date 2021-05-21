@@ -2,8 +2,8 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
-import Parser from 'rss-parser'
-const parser = new Parser()
+import cheerio from 'cheerio'
+import axios from 'axios'
 
 export default function Home(props) {
   return (
@@ -41,14 +41,28 @@ export default function Home(props) {
 }
 
 export async function getServerSideProps(context) {
-  const feedUrl = 'https://thebrick.house/rss'
-  const feed = await parser.parseURL(feedUrl)
-  console.log(`Parsed feed: ${feed.title} with ${feed.items.length} items`)
-  console.log(`Example: ${Object.keys(feed.items[0])}`)
+  const url = 'https://thebrick.house'
+
+  const request = await axios.get(url)
+  const page = cheerio.load(request.data)
+  const bhLinks = page('h3.post-preview__title a')
+
+  const posts = []
+
+  bhLinks.each(function(i, post) {
+    const postObj = {}
+    console.log('post', post)
+    postObj.title = page(this).text()
+    postObj.link = page(this).attr('href')
+    posts.push(postObj)
+  })
+
   return {
     props: {
-      inputUrl: feedUrl,
-      feed: feed,
+      inputUrl: url,
+      feed: {
+        items: posts
+      },
     }
   }
 }
