@@ -19,8 +19,8 @@ export default function Home(props) {
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
-        {props.feed.items.map(item =>
-          <a href={item.link}>{item.title}</a>
+        {props.feed.items.map((item, index) =>
+          <a key={index} href={item.link}>{item.title}</a>
         )}
       </main>
 
